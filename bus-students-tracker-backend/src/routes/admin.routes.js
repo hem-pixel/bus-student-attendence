@@ -65,4 +65,12 @@ router.put('/bus-incharges/:id', adminController.updateBusIncharge);
 router.put('/bus-incharges/:id/assign-bus', adminController.assignBusToIncharge);
 router.delete('/bus-incharges/:id', adminController.deleteBusIncharge);
 
+// Aliases for /incharges
+router.post('/incharges', adminController.createBusIncharge);
+router.get('/incharges', adminController.listBusIncharges);
+router.get('/incharges/:id', adminController.getBusInchargeById);
+router.put('/incharges/:id', adminController.updateBusIncharge);
+router.put('/incharges/:id/assign-bus', adminController.assignBusToIncharge);
+router.delete('/incharges/:id', adminController.deleteBusIncharge);
+
 module.exports = router;

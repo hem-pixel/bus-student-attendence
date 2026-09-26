@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
+import { AdminRoutes } from './routes/admin.routes';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRoles = [] }) => {
@@ -47,12 +48,12 @@ function AppRoutes() {
         }
       />
 
-      {/* Placeholders for upcoming Phase 4, Phase 5, Phase 6 */}
+      {/* Admin Routes - Phase 4 */}
       <Route
         path="/admin/*"
         element={
           <ProtectedRoute requiredRoles={['ADMIN']}>
-            <Settings />
+            <AdminRoutes />
           </ProtectedRoute>
         }
       />
