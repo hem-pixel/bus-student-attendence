@@ -1,86 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import Navbar from './components/common/Navbar';
-import ProtectedRoute from './components/common/ProtectedRoute';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './hooks/useAuth';
 
-function AppContent() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+// Pages
+import Loading from './pages/Loading';
+import Login from './pages/Login';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
+import Unauthorized from './pages/Unauthorized';
 
-  useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('bus_tracker_user');
-      const token = localStorage.getItem('bus_tracker_token');
-      if (storedUser && token) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (err) {
-      console.error('Failed to parse cached session:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    navigate('/dashboard');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('bus_tracker_token');
-    localStorage.removeItem('bus_tracker_user');
-    setUser(null);
-    navigate('/login');
-  };
+// Protected Route Component
+const ProtectedRoute = ({ children, requiredRoles = [] }) => {
+  const { user, userRole, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
-        Initializing Bus Students Tracker...
-      </div>
-    );
+    return <Loading />;
   }
 
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return children;
+};
+
+function AppRoutes() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar user={user} onLogout={handleLogout} />
-      <main style={{ flex: 1 }}>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              user ? <Navigate to="/dashboard" replace /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute user={user}>
-                <DashboardPage user={user} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/"
-            element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-          />
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Loading />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+
+      {/* Protected Routes */}
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Placeholders for upcoming Phase 4, Phase 5, Phase 6 */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute requiredRoles={['ADMIN']}>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/incharge/*"
+        element={
+          <ProtectedRoute requiredRoles={['BUS_INCHARGE']}>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/*"
+        element={
+          <ProtectedRoute requiredRoles={['STUDENT']}>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <Router>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </Router>
   );
 }

@@ -1,54 +1,93 @@
-import React from 'react';
-import { Bus, LogOut, Shield, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
-export default function Navbar({ user, onLogout }) {
+export const Navbar = ({ title = 'Bus Students Tracker' }) => {
+  const { user, userRole, logout } = useAuth();
+  const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
-    <header className="glass-panel" style={{ margin: '16px 24px', padding: '14px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <div style={{
-          width: '42px',
-          height: '42px',
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)'
-        }}>
-          <Bus color="#ffffff" size={24} />
-        </div>
-        <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>Bus Students Tracker</h2>
-          <span style={{ fontSize: '0.75rem', color: '#9ca3af', letterSpacing: '0.04em' }}>PHASE 1 INFRASTRUCTURE & MONITOR</span>
-        </div>
-      </div>
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+      <div className="container-custom flex justify-between items-center py-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center text-xl shadow-md shadow-blue-200">
+            🚌
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">{title}</h1>
+            <span className="text-xs text-gray-500 font-medium">College Transport System</span>
+          </div>
+        </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f3f4f6' }}>{user.email}</div>
-              <span className="badge badge-role" style={{ marginTop: '2px' }}>
-                <Shield size={12} style={{ marginRight: '4px' }} />
-                {user.role}
+        <div className="flex items-center gap-4">
+          {user && (
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-sm font-semibold text-gray-800">{user?.email}</span>
+              <span className="text-xs font-medium text-blue-600 capitalize">
+                {userRole?.toLowerCase()?.replace('_', ' ') || 'User'}
               </span>
             </div>
-            <button 
-              onClick={onLogout}
-              className="btn-secondary"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.85rem' }}
-              title="Sign Out"
+          )}
+
+          {userRole && (
+            <span className="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full uppercase tracking-wider">
+              {userRole}
+            </span>
+          )}
+
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full flex items-center justify-center text-base font-semibold transition-all border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="User menu"
             >
-              <LogOut size={16} />
-              Logout
+              👤
             </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 animate-fadeIn">
+                <div className="px-4 py-2 border-b border-gray-100 sm:hidden">
+                  <p className="text-sm font-semibold text-gray-800 truncate">{user?.email}</p>
+                  <p className="text-xs text-gray-500">{userRole}</p>
+                </div>
+                <Link
+                  to="/settings"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                >
+                  ⚙️ <span>Settings</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                >
+                  🚪 <span>Logout</span>
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9ca3af', fontSize: '0.85rem' }}>
-            <User size={16} /> Guest View
-          </div>
-        )}
+        </div>
       </div>
-    </header>
+    </nav>
   );
-}
+};
+export default Navbar;
