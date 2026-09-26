@@ -6,6 +6,17 @@ import { Map } from '../../components/admin/Map';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { Button } from '../../components/common/Button';
+import { 
+  Radio, 
+  RotateCw, 
+  Satellite, 
+  ShieldCheck, 
+  Activity, 
+  Bus, 
+  MapPin, 
+  CheckCircle2, 
+  AlertTriangle 
+} from 'lucide-react';
 
 export default function LiveTrack() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,7 +42,6 @@ export default function LiveTrack() {
         // Map buses and provide default active location coordinates if not already present
         const processedBuses = rawBuses.map((bus, index) => {
           if (!bus.bus_locations) {
-            // Provide realistic coordinates around campus area for visual tracking
             const defaultCoords = [
               { latitude: 13.0827, longitude: 80.2707 },
               { latitude: 13.0604, longitude: 80.2496 },
@@ -68,88 +78,106 @@ export default function LiveTrack() {
     }
   };
 
+  const activeCount = buses.filter(b => b.status === 'WORKING').length;
+  const maintenanceCount = buses.filter(b => b.status !== 'WORKING').length;
+
   if (loading) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Navbar */}
-        <Navbar title="Live Bus Tracking" onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
+        <Navbar title="Live Fleet Telemetry" onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-6">
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Fleet GPS Radar</h1>
-                  <span className="flex h-3 w-3 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                    <Radio className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                        Fleet GPS Radar Console
+                      </h1>
+                      <span className="flex h-2.5 w-2.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-400 mt-0.5">
+                      Real-time positional telemetry • Auto-sync every 10s • Last sync: <span className="font-mono text-slate-300">{lastRefreshed.toLocaleTimeString()}</span>
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Active live tracking • Refreshes every 10s • Last sync: {lastRefreshed.toLocaleTimeString()}
-                </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" onClick={fetchBuses}>
-                  🔄 Sync Now
-                </Button>
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="md:hidden p-2 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg text-gray-700 shadow-sm"
-                  aria-label="Toggle menu"
+                <Button
+                  variant="outline"
+                  onClick={fetchBuses}
+                  className="border-slate-700 bg-slate-900/60 hover:bg-slate-800 text-slate-300"
                 >
-                  ☰
-                </button>
+                  <RotateCw className="w-4 h-4 mr-2" />
+                  Force Sync Now
+                </Button>
               </div>
             </div>
 
             {/* Error Alert */}
             {error && (
-              <div className="mb-6">
-                <ErrorAlert
-                  message={error}
-                  type="error"
-                  onClose={() => setError('')}
-                />
-              </div>
+              <ErrorAlert
+                message={error}
+                type="error"
+                onClose={() => setError('')}
+              />
             )}
 
-            {/* Map Component */}
+            {/* Map Telemetry Component */}
             <Map
               buses={buses}
               selectedBusId={selectedBusId}
               onBusSelect={(id) => setSelectedBusId(id)}
             />
 
-            {/* Status Summary Banner */}
-            <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md">
-                  🛰️
+            {/* Telemetry Status Strip */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4.5 flex items-center gap-4 backdrop-blur-sm">
+                <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <Satellite className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-sm">GPS Telemetry Engine Active</h3>
-                  <p className="text-xs text-gray-600">
-                    Live positioning coordinates are received directly from in-charge driver transmission units.
-                  </p>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Telemetry Engine</h4>
+                  <p className="text-sm font-bold text-white mt-0.5">Dual GPS & Cellular Uplink</p>
+                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">Status: Sub-second Stream</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold px-3 py-1 bg-white border border-blue-200 rounded-full text-blue-700 shadow-sm">
-                  {buses.filter(b => b.status === 'WORKING').length} Buses Active
-                </span>
-                <span className="text-xs font-semibold px-3 py-1 bg-white border border-rose-200 rounded-full text-rose-700 shadow-sm">
-                  {buses.filter(b => b.status !== 'WORKING').length} Inactive
-                </span>
+
+              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4.5 flex items-center gap-4 backdrop-blur-sm">
+                <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Moving Fleet</h4>
+                  <p className="text-sm font-bold text-emerald-400 mt-0.5">{activeCount} Vehicles Transmitting</p>
+                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">On designated college routes</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4.5 flex items-center gap-4 backdrop-blur-sm">
+                <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Idle / Depot Standby</h4>
+                  <p className="text-sm font-bold text-amber-400 mt-0.5">{maintenanceCount} Units Offline / Maintenance</p>
+                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">Parked at campus terminal</p>
+                </div>
               </div>
             </div>
 

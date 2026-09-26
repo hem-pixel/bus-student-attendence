@@ -4,8 +4,21 @@ import { Navbar } from '../../components/common/Navbar';
 import { Sidebar } from '../../components/common/Sidebar';
 import { BusTable } from '../../components/admin/BusTable';
 import { Button } from '../../components/common/Button';
-import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
+import {
+  Bus,
+  Plus,
+  X,
+  ShieldCheck,
+  Users,
+  CheckCircle2,
+  Wrench,
+  AlertTriangle,
+  Layers,
+  Sparkles,
+  Phone,
+  UserCheck
+} from 'lucide-react';
 
 export default function Buses() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -78,7 +91,6 @@ export default function Buses() {
       setError('');
 
       if (editingBusId) {
-        // Update bus
         const response = await apiClient.put(`/admin/buses/${editingBusId}`, {
           bus_number: busNumber.trim(),
           status: busStatus,
@@ -93,7 +105,6 @@ export default function Buses() {
           setError(response.data?.message || 'Failed to update bus');
         }
       } else {
-        // Create bus
         const response = await apiClient.post('/admin/buses', {
           bus_number: busNumber.trim(),
           status: busStatus,
@@ -102,7 +113,7 @@ export default function Buses() {
 
         if (response.data && response.data.success) {
           setBuses([...buses, response.data.data]);
-          setSuccessMsg(`Bus ${busNumber} created successfully!`);
+          setSuccessMsg(`Bus ${busNumber} registered successfully!`);
           setBusNumber('');
           setShowModal(false);
         } else {
@@ -142,60 +153,102 @@ export default function Buses() {
     }
   };
 
+  // Fleet Quick Stats
+  const totalBuses = buses.length;
+  const operationalBuses = buses.filter(b => b.status === 'WORKING').length;
+  const maintenanceBuses = buses.filter(b => b.status !== 'WORKING').length;
+  const totalCapacity = buses.reduce((acc, curr) => acc + (parseInt(curr.capacity, 10) || 50), 0);
+
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-900/60">
         {/* Navbar */}
-        <Navbar title="Buses Management" onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <Navbar title="Fleet Registry" onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            
+            {/* Header with Title and Add Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
               <div>
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Fleet Management</h1>
-                <p className="text-sm text-gray-500 mt-1">Register, monitor, and assign buses in your institutional fleet</p>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Institutional Transport Network</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Fleet Management</h1>
+                <p className="text-sm text-slate-400 mt-1">Register, monitor, and assign buses in your institutional fleet</p>
               </div>
+
               <div className="flex items-center gap-3">
                 <Button
                   variant="primary"
                   onClick={handleOpenCreateModal}
+                  className="shadow-glow-primary flex items-center gap-2"
                 >
-                  + Add New Bus
+                  <Plus className="w-4 h-4" />
+                  <span>Register Bus</span>
                 </Button>
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="md:hidden p-2 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg text-gray-700 shadow-sm"
-                  aria-label="Toggle menu"
-                >
-                  ☰
-                </button>
+              </div>
+            </div>
+
+            {/* Fleet Metrics Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm backdrop-blur-sm">
+                <div className="flex items-center justify-between text-slate-400 mb-2">
+                  <span className="text-xs font-medium uppercase tracking-wider">Total Fleet</span>
+                  <Bus className="w-4 h-4 text-indigo-400" />
+                </div>
+                <div className="text-2xl font-bold text-white">{totalBuses}</div>
+                <p className="text-xs text-slate-500 mt-1">Registered vehicles</p>
+              </div>
+
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm backdrop-blur-sm">
+                <div className="flex items-center justify-between text-slate-400 mb-2">
+                  <span className="text-xs font-medium uppercase tracking-wider">Operational</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-2xl font-bold text-emerald-400">{operationalBuses}</div>
+                <p className="text-xs text-slate-500 mt-1">In service</p>
+              </div>
+
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm backdrop-blur-sm">
+                <div className="flex items-center justify-between text-slate-400 mb-2">
+                  <span className="text-xs font-medium uppercase tracking-wider">Maintenance</span>
+                  <Wrench className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="text-2xl font-bold text-amber-400">{maintenanceBuses}</div>
+                <p className="text-xs text-slate-500 mt-1">Standby or repair</p>
+              </div>
+
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm backdrop-blur-sm">
+                <div className="flex items-center justify-between text-slate-400 mb-2">
+                  <span className="text-xs font-medium uppercase tracking-wider">Total Seats</span>
+                  <Users className="w-4 h-4 text-sky-400" />
+                </div>
+                <div className="text-2xl font-bold text-sky-400">{totalCapacity}</div>
+                <p className="text-xs text-slate-500 mt-1">Student capacity</p>
               </div>
             </div>
 
             {/* Notifications */}
             {error && (
-              <div className="mb-6">
-                <ErrorAlert
-                  message={error}
-                  type="error"
-                  onClose={() => setError('')}
-                />
-              </div>
+              <ErrorAlert
+                message={error}
+                type="error"
+                onClose={() => setError('')}
+              />
             )}
             {successMsg && (
-              <div className="mb-6">
-                <ErrorAlert
-                  message={successMsg}
-                  type="success"
-                  onClose={() => setSuccessMsg('')}
-                />
-              </div>
+              <ErrorAlert
+                message={successMsg}
+                type="success"
+                onClose={() => setSuccessMsg('')}
+              />
             )}
 
             {/* Buses Table */}
@@ -210,52 +263,60 @@ export default function Buses() {
 
             {/* Create / Edit Bus Modal */}
             {showModal && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {editingBusId ? 'Edit Bus' : 'Create New Bus'}
-                    </h2>
+              <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-7 text-slate-100">
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                        <Bus className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white">
+                          {editingBusId ? 'Edit Vehicle Information' : 'Register New Vehicle'}
+                        </h2>
+                        <p className="text-xs text-slate-400">Configure fleet specs & status</p>
+                      </div>
+                    </div>
                     <button
                       onClick={() => setShowModal(false)}
-                      className="text-gray-400 hover:text-gray-600 text-lg font-bold"
+                      className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
                     >
-                      ✕
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                   
                   <form onSubmit={handleSubmitBus} className="space-y-4">
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                        Bus Number <span className="text-red-500">*</span>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 block mb-1.5">
+                        Bus Number / Reg ID <span className="text-rose-400">*</span>
                       </label>
                       <input
                         type="text"
                         placeholder="e.g., BUS-001 or TN-09-AB-1234"
                         value={busNumber}
                         onChange={(e) => setBusNumber(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                         autoFocus
                       />
                     </div>
 
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                        Status
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 block mb-1.5">
+                        Operational Status
                       </label>
                       <select
                         value={busStatus}
                         onChange={(e) => setBusStatus(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       >
                         <option value="WORKING">Working (Operational)</option>
-                        <option value="NOT_WORKING">Not Working (Maintenance / Breakdown)</option>
+                        <option value="NOT_WORKING">Maintenance / Out of Service</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                        Passenger Capacity
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 block mb-1.5">
+                        Passenger Capacity (Seats)
                       </label>
                       <input
                         type="number"
@@ -263,11 +324,11 @@ export default function Buses() {
                         max="120"
                         value={busCapacity}
                         onChange={(e) => setBusCapacity(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-800">
                       <Button
                         type="button"
                         variant="secondary"
@@ -281,7 +342,7 @@ export default function Buses() {
                         variant="primary"
                         loading={submitting}
                       >
-                        {editingBusId ? 'Save Changes' : 'Create Bus'}
+                        {editingBusId ? 'Save Changes' : 'Register Vehicle'}
                       </Button>
                     </div>
                   </form>
@@ -291,54 +352,59 @@ export default function Buses() {
 
             {/* View Details Modal */}
             {viewingBus && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8">
-                  <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100">
+              <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-7 text-slate-100">
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl p-2 bg-blue-100 rounded-xl">🚌</span>
+                      <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                        <Bus className="w-6 h-6" />
+                      </div>
                       <div>
-                        <h2 className="text-xl font-bold text-gray-900">{viewingBus.bus_number}</h2>
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mt-1 ${
-                          viewingBus.status === 'WORKING' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        <h2 className="text-xl font-bold text-white">{viewingBus.bus_number}</h2>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold mt-1 ${
+                          viewingBus.status === 'WORKING' 
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                         }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${viewingBus.status === 'WORKING' ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
                           {viewingBus.status}
                         </span>
                       </div>
                     </div>
                     <button
                       onClick={() => setViewingBus(null)}
-                      className="text-gray-400 hover:text-gray-600 font-bold"
+                      className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
                     >
-                      ✕
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="space-y-4 text-sm">
-                    <div className="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-200">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Bus ID:</span>
-                        <span className="font-mono text-gray-700">{viewingBus.id}</span>
+                    <div className="bg-slate-950/80 p-4 rounded-xl space-y-3 border border-slate-800/80">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-400 uppercase tracking-wider">Internal Reference</span>
+                        <span className="font-mono text-slate-300">{viewingBus.id}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Capacity:</span>
-                        <span className="font-semibold text-gray-800">{viewingBus.capacity || 50} passengers</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Total Capacity</span>
+                        <span className="font-medium text-slate-200">{viewingBus.capacity || 50} passengers</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Assigned Driver:</span>
-                        <span className="font-semibold text-gray-800">{viewingBus.drivers?.name || viewingBus.driver_name || 'Unassigned'}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Assigned Driver</span>
+                        <span className="font-medium text-slate-200">{viewingBus.drivers?.name || viewingBus.driver_name || 'Unassigned'}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Assigned In-Charge:</span>
-                        <span className="font-semibold text-gray-800">{viewingBus.bus_incharges?.name || viewingBus.incharge_name || 'Unassigned'}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Bus In-Charge</span>
+                        <span className="font-medium text-slate-200">{viewingBus.bus_incharges?.name || viewingBus.incharge_name || 'Unassigned'}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Enrolled Students:</span>
-                        <span className="font-semibold text-blue-600">{viewingBus.student_count || 0}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Enrolled Students</span>
+                        <span className="font-semibold text-indigo-400">{viewingBus.student_count || 0} students</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 mt-6">
+                  <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-800">
                     <Button variant="secondary" onClick={() => setViewingBus(null)}>
                       Close
                     </Button>
@@ -350,7 +416,7 @@ export default function Buses() {
                         handleOpenEditModal(targetId);
                       }}
                     >
-                      Edit Bus
+                      Edit Vehicle
                     </Button>
                   </div>
                 </div>

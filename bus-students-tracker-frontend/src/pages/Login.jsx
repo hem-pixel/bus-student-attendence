@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Bus, 
+  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  ShieldCheck, 
+  UserCheck, 
+  GraduationCap, 
+  Radio, 
+  CheckCircle, 
+  Sparkles,
+  ArrowRight
+} from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -14,6 +28,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [activeRole, setActiveRole] = useState('ADMIN');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -41,127 +56,235 @@ export default function Login() {
     }
   };
 
-  const handleSelectDemo = (demoEmail, demoPassword) => {
+  const handleSelectDemo = (demoEmail, demoPassword, role) => {
     setEmail(demoEmail);
     setPassword(demoPassword);
+    setActiveRole(role);
     setError('');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 p-4">
-      <div className="w-full max-w-md animate-fadeIn">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
-          {/* Logo & Header */}
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-blue-600 text-white text-3xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-300">
-              🚌
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden px-4 py-8">
+      {/* Dynamic Ambient Background Elements */}
+      <div className="absolute top-[-10%] left-[-5%] w-[550px] h-[550px] rounded-full bg-blue-600/20 blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-indigo-600/20 blur-[150px] pointer-events-none" />
+      <div className="absolute inset-0 ambient-dot-grid opacity-30 pointer-events-none" />
+
+      {/* Main Container Card */}
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl backdrop-blur-xl bg-slate-900/70 relative z-10 animate-fadeIn">
+        
+        {/* Left Side: Enterprise Feature Showcase */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-blue-950/40 p-8 sm:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800/80 relative">
+          <div>
+            {/* Brand Logo & Pill */}
+            <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-6">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+              Transport Operations Cloud
             </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-              Bus Students Tracker
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">
-              College Transport Management System
+
+            <div className="flex items-center gap-3.5 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white">
+                <Bus className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-white tracking-tight">TransitPulse</h2>
+                <p className="text-xs text-slate-400 font-medium">Smart College Fleet Management</p>
+              </div>
+            </div>
+
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug mb-4">
+              Safe, synchronized student transit intelligence.
+            </h3>
+            <p className="text-sm text-slate-400 leading-relaxed mb-8">
+              Seamlessly monitor live routes, automate student boarding verification, and manage campus fleets in real time.
             </p>
+
+            {/* Feature List */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-800/80">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                  <Radio className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-200">Real-Time Fleet Radar</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Live GPS location broadcast with sub-second latency.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-800/80">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-200">Safety & Verified Attendance</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Instant in-charge check-in with parental alert notifications.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-800/80">
+                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-200">Autonomous Compliance</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Automated seating optimization and driver duty logs.</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Error Alert */}
-          {error && (
-            <ErrorAlert
-              message={error}
-              type="error"
-              onClose={() => setError('')}
-            />
-          )}
+          <div className="mt-8 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+            <span>Enterprise Grade v2.4</span>
+            <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              All Systems Operational
+            </span>
+          </div>
+        </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="email"
-              label="Email Address"
-              placeholder="admin@college.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-            />
+        {/* Right Side: Login Form */}
+        <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-center bg-slate-900/40">
+          <div className="max-w-md w-full mx-auto">
+            
+            <div className="mb-6">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Welcome Back
+              </h1>
+              <p className="text-sm text-slate-400 mt-1">
+                Enter your authorized credentials to access your transport workspace.
+              </p>
+            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password <span className="text-red-500">*</span>
+            {/* Error Alert */}
+            {error && (
+              <ErrorAlert
+                message={error}
+                type="error"
+                onClose={() => setError('')}
+              />
+            )}
+
+            {/* Quick Demo Selector Tabs */}
+            <div className="mb-6">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Quick Demo Switcher
               </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 text-gray-800"
-                  required
-                />
+              <div className="grid grid-cols-3 gap-2 p-1 bg-slate-950/60 rounded-xl border border-slate-800">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 text-sm"
-                  tabIndex="-1"
+                  onClick={() => handleSelectDemo('admin@college.edu', 'Admin@123', 'ADMIN')}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'ADMIN'
+                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectDemo('incharge@college.edu', 'Incharge@123', 'BUS_INCHARGE')}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'BUS_INCHARGE'
+                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/30'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Incharge</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectDemo('student@college.edu', 'Student@123', 'STUDENT')}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'STUDENT'
+                      ? 'bg-purple-600 text-white shadow-sm shadow-purple-500/30'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>Student</span>
                 </button>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              loading={loading}
-              className="w-full mt-2 shadow-lg shadow-blue-500/30"
-            >
-              Sign In
-            </Button>
-          </form>
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                  Institutional Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="name@college.edu"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-200 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+              </div>
 
-          {/* Demo Credentials Quick Selector */}
-          <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-gray-700">
-            <p className="font-bold text-gray-900 mb-2 flex items-center gap-1.5">
-              <span>⚡</span> Quick Demo Logins (Click to autofill):
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleSelectDemo('admin@college.edu', 'Admin@123')}
-                className="py-1.5 px-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded font-semibold text-center transition-colors truncate"
-                title="admin@college.edu / Admin@123"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSelectDemo('incharge@college.edu', 'Incharge@123')}
-                className="py-1.5 px-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-semibold text-center transition-colors truncate"
-                title="incharge@college.edu / Incharge@123"
-              >
-                Incharge
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSelectDemo('student@college.edu', 'Student@123')}
-                className="py-1.5 px-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded font-semibold text-center transition-colors truncate"
-                title="student@college.edu / Student@123"
-              >
-                Student
-              </button>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Password
+                  </label>
+                  <span className="text-[11px] text-slate-500 font-mono">Default: Role@123</span>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full pl-10 pr-11 py-2.5 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-200 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                    tabIndex="-1"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  loading={loading}
+                  className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 text-sm"
+                >
+                  <span>Sign In to Dashboard</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+
+            {/* Security Badge */}
+            <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-center gap-2 text-xs text-slate-500">
+              <Lock className="w-3.5 h-3.5 text-blue-500" />
+              <span>TLS 1.3 End-to-End Encrypted Session</span>
             </div>
-            <p className="text-[11px] text-gray-500 mt-2 text-center">
-              Password pattern: <code className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200">Role@123</code>
-            </p>
-          </div>
 
-          {/* Footer */}
-          <p className="text-center text-gray-400 text-xs mt-6">
-            © 2026 College Bus Tracking System. All rights reserved.
-          </p>
+          </div>
         </div>
+
       </div>
     </div>
   );

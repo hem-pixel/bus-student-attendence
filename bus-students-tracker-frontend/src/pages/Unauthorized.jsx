@@ -1,27 +1,50 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { ShieldAlert, ArrowLeft, Home } from 'lucide-react';
 
 export default function Unauthorized() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-slate-200 p-4">
-      <div className="text-center max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-gray-100 animate-fadeIn">
-        <div className="text-7xl font-black text-red-500 mb-2 tracking-tight">403</div>
-        <div className="text-4xl mb-4">⛔</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-        <p className="text-gray-600 text-sm mb-6">
-          Your current account role does not have authorization to view this section of the transport tracker.
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 font-sans p-4 relative overflow-hidden text-slate-100">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="relative text-center max-w-md w-full p-8 bg-slate-900/80 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl animate-fadeIn">
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-6 text-rose-400">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+
+        <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-red-400 to-amber-300 mb-2 tracking-tight">
+          403
+        </div>
+
+        <h1 className="text-2xl font-bold text-white mb-2">Access Restricted</h1>
+        <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+          Your current account role does not have authorization clearance to view this module of the transport fleet manager.
         </p>
-        <Button
-          variant="primary"
-          size="lg"
-          className="w-full shadow-lg shadow-blue-500/20"
-          onClick={() => navigate('/')}
-        >
-          Return to Dashboard
-        </Button>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="outline"
+            size="md"
+            className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            className="flex-1 shadow-lg shadow-blue-500/25"
+            onClick={() => navigate('/')}
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Dashboard
+          </Button>
+        </div>
       </div>
     </div>
   );
