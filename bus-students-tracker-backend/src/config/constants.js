@@ -1,0 +1,34 @@
+// Application Constants
+module.exports = {
+  ROLES: {
+    ADMIN: 'ADMIN',
+    BUS_INCHARGE: 'BUS_INCHARGE',
+    STUDENT: 'STUDENT'
+  },
+  BUS_STATUS: {
+    WORKING: 'WORKING',
+    NOT_WORKING: 'NOT_WORKING'
+  },
+  GENDER: {
+    MALE: 'MALE',
+    FEMALE: 'FEMALE',
+    OTHER: 'OTHER'
+  },
+  ATTENDANCE_STATUS: {
+    PRESENT: 'PRESENT',
+    ABSENT: 'ABSENT'
+  },
+  ALERT_STATUS: {
+    OPEN: 'OPEN',
+    IN_PROGRESS: 'IN_PROGRESS',
+    RESOLVED: 'RESOLVED'
+  },
+  USER_STATUS: {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE'
+  },
+  STUDENT_STATUS: {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE'
+  }
+};
