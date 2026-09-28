@@ -10,6 +10,7 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
 import { AdminRoutes } from './routes/admin.routes';
+import { InchargeRoutes } from './routes/incharge.routes';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRoles = [] }) => {
@@ -57,11 +58,13 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* In-Charge Routes - Phase 5 */}
       <Route
         path="/incharge/*"
         element={
           <ProtectedRoute requiredRoles={['BUS_INCHARGE']}>
-            <Settings />
+            <InchargeRoutes />
           </ProtectedRoute>
         }
       />
