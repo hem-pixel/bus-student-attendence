@@ -43,6 +43,10 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/alerts', alertRoutes);
 
 // Student Portal / Dashboard route
+app.get('/api/student/dashboard', verifyToken, (req, res, next) => {
+  req.params.id = 'current';
+  adminController.getStudentDashboard(req, res, next);
+});
 app.get('/api/student/dashboard/:id', verifyToken, adminController.getStudentDashboard);
 
 // Health check endpoints

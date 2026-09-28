@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
 import { AdminRoutes } from './routes/admin.routes';
 import { InchargeRoutes } from './routes/incharge.routes';
+import { StudentRoutes } from './routes/student.routes';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRoles = [] }) => {
@@ -68,11 +69,12 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      {/* Student Routes - Phase 6 */}
       <Route
         path="/student/*"
         element={
           <ProtectedRoute requiredRoles={['STUDENT']}>
-            <Settings />
+            <StudentRoutes />
           </ProtectedRoute>
         }
       />

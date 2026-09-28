@@ -1388,39 +1388,71 @@ const getInchargeDashboard = async (req, res) => {
 const getStudentDashboard = async (req, res) => {
   try {
     const { id } = req.params;
+    const lookupId = (id === 'me' || id === 'current' || !id) ? req.user?.id : id;
 
-    // Get student assigned bus
-    const { data: student, error: studentError } = await supabaseAdmin
-      .from('students')
-      .select('*, buses(*, bus_locations(*), bus_incharges(name, phone_number))')
-      .eq('id', id)
-      .single();
+    // Try finding by student.id
+    let student = null;
+    if (lookupId) {
+      const { data: studentById } = await supabaseAdmin
+        .from('students')
+        .select('*, buses(*, bus_locations(*), bus_incharges(name, phone_number))')
+        .eq('id', lookupId)
+        .maybeSingle();
+      student = studentById;
 
-    if (studentError || !student) {
+      // If not found by primary key id, search by user_id
+      if (!student) {
+        const { data: studentByUser } = await supabaseAdmin
+          .from('students')
+          .select('*, buses(*, bus_locations(*), bus_incharges(name, phone_number))')
+          .eq('user_id', lookupId)
+          .maybeSingle();
+        student = studentByUser;
+      }
+    }
+
+    if (!student) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Student not found' 
+        message: 'Student record not found for the given identifier' 
       });
     }
 
-    const locations = student.buses && student.buses.bus_locations;
-    const lastLocation = Array.isArray(locations) && locations.length > 0
-      ? locations[0].updated_at
-      : (locations && locations.updated_at ? locations.updated_at : null);
+    const assignedBus = student.buses ? { ...student.buses } : null;
+    let busLocation = null;
+    if (assignedBus && assignedBus.bus_locations) {
+      busLocation = Array.isArray(assignedBus.bus_locations)
+        ? (assignedBus.bus_locations[0] || null)
+        : assignedBus.bus_locations;
+      assignedBus.bus_locations = busLocation;
+    }
+
+    let busIncharge = null;
+    if (assignedBus && assignedBus.bus_incharges) {
+      busIncharge = Array.isArray(assignedBus.bus_incharges)
+        ? (assignedBus.bus_incharges[0] || null)
+        : assignedBus.bus_incharges;
+      assignedBus.bus_incharges = busIncharge;
+    }
+
+    const lastLocation = busLocation ? (busLocation.updated_at || busLocation.created_at) : null;
 
     res.status(200).json({
       success: true,
       message: 'Student dashboard fetched successfully',
       data: {
+        student_id: student.id,
         student_name: student.name,
-        assigned_bus: student.buses || null,
+        register_number: student.register_number,
+        stop_name: student.stop_name,
+        assigned_bus: assignedBus,
         last_location_update: lastLocation
       }
     });
   } catch (error) {
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to fetch student dashboard' 
+      message: 'Failed to fetch student dashboard: ' + error.message 
     });
   }
 };
