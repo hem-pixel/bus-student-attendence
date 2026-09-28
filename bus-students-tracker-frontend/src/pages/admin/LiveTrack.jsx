@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../../services/api';
+import SocketService from '../../services/socketService';
 import { Navbar } from '../../components/common/Navbar';
 import { Sidebar } from '../../components/common/Sidebar';
 import { Map } from '../../components/admin/Map';
@@ -28,50 +29,83 @@ export default function LiveTrack() {
 
   useEffect(() => {
     fetchBuses();
-    // Auto-refresh every 10 seconds for real-time telemetry
-    const interval = setInterval(fetchBuses, 10000);
-    return () => clearInterval(interval);
+
+    // Subscribe to real-time WebSocket fleet updates
+    const handleFleetUpdate = (data) => {
+      if (!data || !data.busId) return;
+      const updatedBusId = data.busId;
+      const newLoc = data.location;
+
+      setBuses((prevBuses) =>
+        prevBuses.map((bus) => {
+          if (String(bus.id) === String(updatedBusId)) {
+            return {
+              ...bus,
+              latitude: newLoc.latitude,
+              longitude: newLoc.longitude,
+              speed: newLoc.speed,
+              bus_locations: {
+                ...bus.bus_locations,
+                ...newLoc,
+              },
+            };
+          }
+          return bus;
+        })
+      );
+      setLastRefreshed(new Date());
+    };
+
+    SocketService.connect();
+    SocketService.subscribeToFleet(handleFleetUpdate);
+
+    // Auto-refresh fallback every 15 seconds
+    const interval = setInterval(fetchBuses, 15000);
+
+    return () => {
+      clearInterval(interval);
+      SocketService.unsubscribeFromFleet(handleFleetUpdate);
+    };
   }, []);
 
   const fetchBuses = async () => {
     try {
-      const response = await apiClient.get('/admin/buses');
+      const response = await apiClient.get('/locations');
       
       if (response.data && response.data.success) {
-        const rawBuses = response.data.data || [];
-        // Map buses and provide default active location coordinates if not already present
-        const processedBuses = rawBuses.map((bus, index) => {
-          if (!bus.bus_locations) {
-            const defaultCoords = [
-              { latitude: 13.0827, longitude: 80.2707 },
-              { latitude: 13.0604, longitude: 80.2496 },
-              { latitude: 13.0451, longitude: 80.2012 },
-              { latitude: 13.1143, longitude: 80.2158 },
-              { latitude: 13.0102, longitude: 80.2157 }
-            ];
-            const coord = defaultCoords[index % defaultCoords.length];
-            return {
-              ...bus,
-              bus_locations: {
-                latitude: coord.latitude + (Math.random() - 0.5) * 0.005,
-                longitude: coord.longitude + (Math.random() - 0.5) * 0.005
-              }
-            };
-          }
-          return bus;
-        });
-
-        setBuses(processedBuses);
-        if (processedBuses.length > 0 && !selectedBusId) {
-          setSelectedBusId(processedBuses[0].id);
+        const fleetData = response.data.data || [];
+        setBuses(fleetData);
+        if (fleetData.length > 0 && !selectedBusId) {
+          setSelectedBusId(fleetData[0].id || fleetData[0].bus_id);
         }
         setLastRefreshed(new Date());
         setError('');
       } else {
-        setError('Failed to load bus location data');
+        // Fallback to /admin/buses if /locations returned error
+        const fallbackRes = await apiClient.get('/admin/buses');
+        if (fallbackRes.data && fallbackRes.data.success) {
+          setBuses(fallbackRes.data.data || []);
+          if (fallbackRes.data.data.length > 0 && !selectedBusId) {
+            setSelectedBusId(fallbackRes.data.data[0].id);
+          }
+        }
       }
     } catch (err) {
       console.warn('Live track fetch notice:', err.message);
+      // Try /admin/buses fallback
+      try {
+        const fallbackRes = await apiClient.get('/admin/buses');
+        if (fallbackRes.data && fallbackRes.data.success) {
+          setBuses(fallbackRes.data.data || []);
+          if (fallbackRes.data.data.length > 0 && !selectedBusId) {
+            setSelectedBusId(fallbackRes.data.data[0].id);
+          }
+          setError('');
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
       setError('Error fetching bus locations: ' + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
